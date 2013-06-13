@@ -1,0 +1,47 @@
+extends layout
+
+block content
+	div(class="wrapper container")
+		div(class="row")
+			div(class="span3")
+			div(class="span6")
+				div(id="product-edit")
+					form(class="form-vertical")
+						div(class="control-group price-group")
+							label(class="control-label", for="price") Price
+							div(class="controls")
+								input(id="price", type="text")
+								span(class="help-inline hide")
+						div(class="control-group description-group")
+							label(class="control-label", for="description") Description
+							div(class="controls")
+								textarea(id="description", rows=10)
+								span(class="help-inline hide")
+						div(class="control-group email-group")
+							label(class="control-label", for="email") Email
+							div(class="controls")
+								input(id="email", type="text")
+								span(class="help-inline hide")
+						div(class="control-group address-group")
+							label(class="control-label", for="address") Address or Postal Code
+							div(class="controls")
+								input(id="address", type="text")
+								span(class="help-inline hide")
+								img(id="map", class="thumbnail")
+						div(class="control-group images-group")
+							label(class="control-label", for="") Images
+							div(class="controls")
+								div(id="thumbs")
+								span(class="clear")
+								a(href="#", id="upload-link", class="btn thumbnail")
+									+
+								span(class="help-inline")
+						div(class="control-group")
+							div(class="controls")
+								button(id="sell", type="submit", class="btn btn-primary btn-block") Sell
+			div(class="span3")
+	script
+		$(function() {
+			filepicker.setKey("Ac73slTiSvatPPuoHaRgHz");
+			var productEditView = new ProductEditView();
+		});

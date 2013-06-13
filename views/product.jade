@@ -1,0 +1,30 @@
+extends layout
+
+block content
+	div(id="product", class="container wrapper")
+		div(class="row")
+			div(class="span8")
+				div(id="left")
+					div(id="image")
+						img(src=product.images[0].url+"/convert?w=600&height=400&fit=crop")
+					div(id="thumbs")
+						each image in product.images
+							img(class="thumbnail", src=image.url+"/convert?w=50&height=50&fit=crop")
+			div(class="span4 right")
+				div(class="divider")
+				img(id="map", class="thumbnail")
+				div(class="divider")
+				form(id="contact", class="form-vertical")
+					div(class="control-group email-group")
+						label(class="control-label", for="email") Email
+						div(class="controls")
+							input(id="email", type="text")
+							span(class="help-inline hide")
+					div(class="control-group message-group")
+						label(class="control-label", for="message") Message
+						div(class="controls")
+							textarea(id="message", rows=5)
+							span(class="help-inline hide")
+					div(class="control-group")
+						div(class="controls")
+							button(id="contact", type="submit", class="btn btn-primary btn-block") Contact Seller
