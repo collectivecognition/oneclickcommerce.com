@@ -21,15 +21,7 @@ ProductEditView = Backbone.View.extend({
 		
 		this.listenTo(this.thumbs, "add", this.addThumb);
 		this.listenTo(this.model, "change", this.format);
-		/* this.$("input[type=text]", "textarea").keypress(function(e){
-			scope.check();
-			return true;
-		});*/
-		/*var scope = this, timer;
-		this.$("#address").keypress(function(e){
-			clearTimeout(timer);
-			timer = setTimeout(scope.updateMap, 500);
-		});*/
+		
 		// Rate limited simulation of change events on inputs
 		// Handle copy/paste, deletion, etc..
 		var vals = {}, scope = this;
@@ -47,16 +39,41 @@ ProductEditView = Backbone.View.extend({
 				}
 			});
 		}, 100);
+		
+		// Set initial map location to current city using HTML5 geolocation API and the Google geocoder API
+		var scope = this;
+		if(navigator && navigator.geolocation){
+			navigator.geolocation.getCurrentPosition(function(pos){
+				if(!$("#address").val() && !$("#address").is(":focus")){
+					var geocoder = new google.maps.Geocoder();
+					if(geocoder){
+						var latLng = new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
+						geocoder.geocode({latLng: latLng}, function(res, status){
+							if(status == google.maps.GeocoderStatus.OK && res){
+								$("#address").val(res[0].formatted_address);
+								scope.updateMap(true);
+							}
+						});
+					}
+				}
+			}, 
+			
+			function(err){},
+			
+			{
+				enableHighAccuracy: false,
+				timeout: 10000,
+				maximumAge: Math.Infinity
+			});
+		}
 	},
 	
-	render: function(){
-	
-	},
+	render: function(){},
 	
 	events: {
 		"submit form": "sell",
-		"blur input": "check",
-		"blur textarea": "check",
+		// "blur input": "check",
+		// "blur textarea": "check",
 		"click #upload-link": "upload",
 		"change": "updateMap"
 	},
@@ -75,11 +92,9 @@ ProductEditView = Backbone.View.extend({
 				img.addClass("thumbnail");
 				img.attr("src", url);
 				scope.thumbs.add({url: url});
-				
 			}
 		});	
 	},
-	
 	
 	check: function(e){
 		if(e) e.preventDefault();
@@ -104,6 +119,7 @@ ProductEditView = Backbone.View.extend({
 					// FIXME Backbone.history.navigate("#product/" + res.id);
 					window.location = "/product/" + res.id;
 				},
+				
 				error: function(model, xhr, opt){
 					// FIXME
 				}
@@ -126,10 +142,11 @@ ProductEditView = Backbone.View.extend({
 	},
 	
 	lastUpdate: new Date().getTime(),
-	updateMap: function(){
+	
+	updateMap: function(force){
 		var now = new Date().getTime();
-		if(now - this.lastUpdate > 2000){
-			var address = encodeURI($("#address").val());
+		if(now - this.lastUpdate > 2000 || force){
+			address = encodeURI($("#address").val());
 			if(address.length > 5){
 				var url = "http://maps.googleapis.com/maps/api/staticmap?center=" + address + "&zoom=13&size=410x150&maptype=roadmap&sensor=false";
 				this.$("#map").attr("src", url);
