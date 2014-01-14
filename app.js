@@ -15,8 +15,8 @@ var path = require("path");
 var fs = require("fs");
 var sys = require("sys")
 var cluster = require("cluster");
-var redis = require("redis");
-var RedisStore = require("connect-redis")(express);
+// var redis = require("redis");
+// var RedisStore = require("connect-redis")(express);
 var backbone = require("backbone");
 var _ = require("underscore");
 var validation = require("backbone-validation");
@@ -32,11 +32,11 @@ var app = express();
 
 // Setup redis
 
-var redisClient = redis.createClient();
+// var redisClient = redis.createClient();
 
-redisClient.on("error", function (err) {
-    console.log("Redis error: " + err);
-});
+// redisClient.on("error", function (err) {
+    // console.log("Redis error: " + err);
+// });
 
 // App configuration
 
@@ -55,8 +55,8 @@ app.configure(function(){
 	
 	app.use(express.cookieParser());
 	app.use(express.session({
-		secret: config.secret,
-		store: new RedisStore({})
+		secret: config.secret// ,
+		// store: new RedisStore({})
 	}));
 	app.use(require("less-middleware")({ src: __dirname + "/public" }));
 	app.use(express.static(path.join(__dirname, "public")));
@@ -72,10 +72,11 @@ app.configure("development", function(){
 // Generate sequential IDs
 
 var generateToken = function(callback){
-	redisClient.incr("product:id", function(err, id){
-		id = skip32.encrypt(id).toString(16);
-		callback(id);
-	});
+	// redisClient.incr("product:id", function(err, id){
+	// 	id = skip32.encrypt(id).toString(16);
+	// 	callback(id);
+	// });
+	callback(parseInt(Math.random() * 100000));
 }
 
 // Routes
@@ -97,9 +98,9 @@ app.post("/product", function(req, res){
 	}
 	if(valid){
 		generateToken(function(token){
-			redisClient.set("product:" + token, JSON.stringify(product), function(){
+			/*redisClient.set("product:" + token, JSON.stringify(product), function(){
 				res.send(200, {msg: "success", id: token});
-			});
+			});*/
 		});
 	}else{
 		// Product has already been validated on the client so
@@ -112,13 +113,13 @@ app.post("/product", function(req, res){
 // View a single product
 
 app.get("/product/:id", function(req, res){
-	redisClient.get("product:" + req.params.id, function(err, product){
+	/*redisClient.get("product:" + req.params.id, function(err, product){
 		product = JSON.parse(product);
 		console.log("-------");
 		console.log(product);
 		console.log("-------");
 		res.render("product", {product: product});
-	});
+	});*/
 });
 
 // Fetch a list of products, with an optional page offset

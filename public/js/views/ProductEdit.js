@@ -58,11 +58,11 @@ ProductEditView = Backbone.View.extend({
 				}
 			}, 
 			
-			function(err){},
+			function(err){ /* Never called if timeout is infinity */ },
 			
 			{
 				enableHighAccuracy: false,
-				timeout: 10000,
+				timeout: Math.Infinity,
 				maximumAge: Math.Infinity
 			});
 		}
