@@ -10,8 +10,8 @@
     	"url": "https://github.com/collectivecognition/oneclickcommerce.com.git"
 	},
 	"dependencies": {
-		"express": "*",
-		"jade": "*",
+		"express": "3.2.5",
+		"jade": "0.31.1",
 		"less-middleware": "*",
 		"express-logger": "*",
 		"connect-redis": "*",
