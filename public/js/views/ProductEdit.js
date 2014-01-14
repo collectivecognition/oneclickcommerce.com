@@ -48,6 +48,7 @@ ProductEditView = Backbone.View.extend({
 					var geocoder = new google.maps.Geocoder();
 					if(geocoder){
 						var latLng = new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
+						console.log("latlng", latLng)
 						geocoder.geocode({latLng: latLng}, function(res, status){
 							if(status == google.maps.GeocoderStatus.OK && res){
 								$("#address").val(res[0].formatted_address);

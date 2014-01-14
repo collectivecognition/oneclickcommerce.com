@@ -15,8 +15,8 @@ var path = require("path");
 var fs = require("fs");
 var sys = require("sys")
 var cluster = require("cluster");
-// var redis = require("redis");
-// var RedisStore = require("connect-redis")(express);
+var MongoClient = require("mongodb").MongoClient;
+var ObjectID = require("mongodb").ObjectID;
 var backbone = require("backbone");
 var _ = require("underscore");
 var validation = require("backbone-validation");
@@ -30,13 +30,9 @@ var geo = require("geo");
 	
 var app = express();
 
-// Setup redis
+// Setup mongodb
 
-// var redisClient = redis.createClient();
-
-// redisClient.on("error", function (err) {
-    // console.log("Redis error: " + err);
-// });
+var mongoUri = process.env.MONGO_PATH;
 
 // App configuration
 
@@ -55,8 +51,7 @@ app.configure(function(){
 	
 	app.use(express.cookieParser());
 	app.use(express.session({
-		secret: config.secret// ,
-		// store: new RedisStore({})
+		secret: config.secret
 	}));
 	app.use(require("less-middleware")({ src: __dirname + "/public" }));
 	app.use(express.static(path.join(__dirname, "public")));
@@ -68,16 +63,6 @@ app.configure(function(){
 app.configure("development", function(){
 	app.use(express.errorHandler());
 });
-
-// Generate sequential IDs
-
-var generateToken = function(callback){
-	// redisClient.incr("product:id", function(err, id){
-	// 	id = skip32.encrypt(id).toString(16);
-	// 	callback(id);
-	// });
-	callback(parseInt(Math.random() * 100000));
-}
 
 // Routes
 
@@ -97,10 +82,13 @@ app.post("/product", function(req, res){
 		if(!(/^http[s]?:\/\/(?:www.)?filepicker.io/i).test(product.attributes.images[ii].url)) valid = false;
 	}
 	if(valid){
-		generateToken(function(token){
-			/*redisClient.set("product:" + token, JSON.stringify(product), function(){
-				res.send(200, {msg: "success", id: token});
-			});*/
+		MongoClient.connect(mongoUri, function(error, db){
+			if(error){ return console.log(error); }
+			var collection = db.collection("products");
+			collection.insert(product, function(error, result){
+				if(error){ return console.log(error); }
+				res.send(200, {msg: "success", id: product._id});
+			});
 		});
 	}else{
 		// Product has already been validated on the client so
@@ -113,13 +101,17 @@ app.post("/product", function(req, res){
 // View a single product
 
 app.get("/product/:id", function(req, res){
-	/*redisClient.get("product:" + req.params.id, function(err, product){
-		product = JSON.parse(product);
-		console.log("-------");
-		console.log(product);
-		console.log("-------");
-		res.render("product", {product: product});
-	});*/
+	MongoClient.connect(mongoUri, function(error, db){
+		if(error){ return console.log(error); }
+		var collection = db.collection("products");
+		collection.findOne({_id: new ObjectID(req.params.id)}, function(error, product){
+			if(error){ return console.log(error); }
+			console.log("------");
+			console.log(product);
+			console.log("------");
+			res.render("product", {product: product.attributes});
+		});
+	});
 });
 
 // Fetch a list of products, with an optional page offset
